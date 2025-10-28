@@ -1,5 +1,5 @@
-import { getTagColor } from "../common/utils";
-import { Article } from "../types/articles";
+import { formatDate, getTagColor } from "../common/utils";
+import { Article } from "../types";
 
 export default function ArticleCard({ article }: { article: Article }) {
   return (
@@ -14,18 +14,18 @@ export default function ArticleCard({ article }: { article: Article }) {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2">
-            {article.tags && article.tags.map((tag, index) => (
+            {article.tags && article.tags.map((tag) => (
               <span
-                key={index}
+                key={tag.id}
                 className={`text-xs uppercase tracking-wide font-bold ${getTagColor(
-                  tag
+                  tag.name
                 )}`}
               >
-                {tag}
+                {tag.name}
               </span>
             ))}
             <span className="text-xs text-gray-500">•</span>
-            <span className="text-xs text-gray-500">{article.createdAt}</span>
+            <span className="text-xs text-gray-500">{formatDate(article.createdAt)}</span>
           </div>
 
           <h2 className="text-xl font-bold text-gray-100 mb-2 group-hover:text-cyan-400 transition-colors line-clamp-2">

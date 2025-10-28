@@ -18,32 +18,140 @@ export type Database = {
         Row: {
           codePreview: string | null
           created_at: string
+          dislikes: number | null
           excerpt: string
           id: string
+          likes: number
           readTime: string
-          tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
           codePreview?: string | null
           created_at?: string
+          dislikes?: number | null
           excerpt?: string
           id?: string
+          likes: number
           readTime?: string
-          tags?: string[] | null
           title?: string
           updated_at: string
         }
         Update: {
           codePreview?: string | null
           created_at?: string
+          dislikes?: number | null
           excerpt?: string
           id?: string
+          likes?: number
           readTime?: string
-          tags?: string[] | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      articles_categories: {
+        Row: {
+          article_id: string
+          category_id: number
+          id: number
+        }
+        Insert: {
+          article_id: string
+          category_id: number
+          id?: number
+        }
+        Update: {
+          article_id?: string
+          category_id?: number
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_categories_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "article"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "category"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      articles_tags: {
+        Row: {
+          article_id: string
+          id: number
+          tag_id: number
+        }
+        Insert: {
+          article_id: string
+          id?: number
+          tag_id: number
+        }
+        Update: {
+          article_id?: string
+          id?: number
+          tag_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_tags_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "article"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tag"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      category: {
+        Row: {
+          color: string
+          created_at: string
+          id: number
+          name: string | null
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
+      }
+      tag: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
         }
         Relationships: []
       }
