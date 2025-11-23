@@ -4,7 +4,7 @@ export async function Newsletter() {
     
     
     return (
-    <div className="bg-gradient-to-br from-cyan-900/20 to-green-900/20 border border-cyan-800/30 rounded-lg p-6">
+    <div className="bg-linear-to-br from-cyan-900/20 to-green-900/20 border border-cyan-800/30 rounded-lg p-6">
       <h3 className="text-sm uppercase tracking-wider text-cyan-400 mb-2 font-bold">
         Stay Updated
       </h3>
