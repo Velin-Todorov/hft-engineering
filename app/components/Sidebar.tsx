@@ -41,9 +41,6 @@ export async function Sidebar() {
             mostPopularArticles.map((post, index) => (
               <a key={index} href="#" className="block group">
                 <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-cyan-400/20 to-green-400/20 rounded flex items-center justify-center text-cyan-400 text-xs font-bold">
-                    {index + 1}
-                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-300 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-tight mb-1">
                       {post.title}

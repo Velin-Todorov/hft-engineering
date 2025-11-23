@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { formatDate, getTagColor } from "../common/utils";
 import { Article } from "../types";
-import MarkdownRenderer from "./Markdown";
 
 export default function ArticleCard({ article }: { article: Article }) {
   return (

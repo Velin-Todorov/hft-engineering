@@ -26,19 +26,6 @@ export default function Navbar() {
           HFT Engineering
         </Link>
 
-        <ul className="hidden md:flex gap-8 font-mono text-sm">
-          {links.map((link) => (
-            <li key={link.name}>
-              <Link
-                href={link.href}
-                className="text-gray-400 hover:text-cyan-400 transition-colors"
-              >
-                {link.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
         <button
           onClick={() => setIsOpen(true)}
           className="md:hidden text-gray-400 hover:text-cyan-400"
