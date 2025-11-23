@@ -2,36 +2,49 @@ import { Database } from "@/database.types";
 import { Insert, Update } from ".";
 import { supabase } from "../lib/supabase";
 import { Article } from "../types";
+import { useQuery } from "@tanstack/react-query";
 
 type RawArticle = Database["public"]["Tables"]["article"]["Row"];
 type RawArticleInsert = Insert<"article">;
 type RawArticleUpdate = Update<"article">;
 
-export async function getArticles(): Promise<Article[]> {
-  const { data, error } = await supabase
+export function useArticles(limit: number = 10) {
+  return useQuery({
+    queryKey: ["articles"],
+    queryFn: async () => getArticles(limit),
+  });
+}
+
+export function useMostPopularArticles() {
+  return useQuery({
+    queryKey: ["mostPopularArticles"],
+    queryFn: async () => getMostPopularArtictles(),
+  });
+}
+
+export async function getArticles(limit: number = 10): Promise<Article[]> {
+  const { data: articles, error } = await supabase
     .from("article")
-    .select(`
+    .select(
+      `
       *,
-      createdAt:created_at,
-      articles_tags (
-        tag:tag(
-          id,
-          name
-        )
-      )
-    `)
+      category (*),
+      author (*)
+    `
+    )
+    .limit(limit)
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Failed to fetch articles:", error.message);
     return [];
   }
-   const results =  data.map(({ articles_tags, ...rest }) => ({
-    ...rest,
-    tags: (articles_tags.map((at) => at.tag))
-  }));
 
-  return results
+  const transformedArticles = articles?.map((article) =>
+    transformArticle(article)
+  );
+
+  return transformedArticles;
 }
 
 export async function createArticle(data: RawArticleInsert) {
@@ -48,22 +61,27 @@ export async function updateArticle(articleId: string, data: RawArticleUpdate) {
 
 export async function getArticleById(
   articleId: string
-): Promise<RawArticle | undefined> {
+): Promise<Article | undefined> {
   const { data, error } = await supabase
     .from("article")
-    .select("*")
+    .select(
+      `
+      *,
+      category (*),
+      author(*)
+    `
+    )
     .eq("id", articleId)
     .single();
 
   if (error) {
-    console.error(
-      `Failed to fetch article with id ${articleId}. Error:`,
-      error.message
+    throw new Error(
+      `Failed to fetch article with id ${articleId}. Error: ${error.message}`
     );
-    return;
   }
+  const transformedArticle = transformArticle(data);
 
-  return data;
+  return transformedArticle;
 }
 
 // getMostPopularArtictles fetches the most popular articles based on how many likes they got. We return the top 5 articles.
@@ -86,3 +104,21 @@ export async function getMostPopularArtictles(): Promise<
   return data;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformArticle(article: any): Article {
+  const transformedArticle = {
+    ...article,
+    author: {
+      id: article.author && article.author.id,
+      photoUrl: article.author && article.author.photo_url,
+      linkedIn: article.author && article.author.linked_in,
+      name: article.author && article.author.name,
+      position: article.author && article.author.position,
+    },
+
+    createdAt: article.created_at,
+    readTime: article.read_time,
+    updatedAt: article.updated_at,
+  };
+  return transformedArticle;
+}

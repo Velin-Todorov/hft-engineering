@@ -1,11 +1,28 @@
-import { Tag } from "./tag";
-
 export interface Article {
   id: string;
   title: string;
-  excerpt: string;
+  markdown: string;
   readTime: string;
-  tags: Tag[] | null;
-  codePreview: string | null;
-  createdAt: string
+  likes: number;
+  dislikes: number;
+  category: Category | null;
+  author: Author | null;
+  isDraft: boolean;
+  summary: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  color: string;
+}
+
+interface Author {
+  id: number | null;
+  name: string | null;
+  position: string | null;
+  photoUrl: string | null;
+  linkedIn: string | null;
 }

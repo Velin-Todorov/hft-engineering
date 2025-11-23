@@ -1,4 +1,13 @@
-export type Json =
+[?25l[?2004h
+                                                                                                           
+    1. lxlspnakudgbmtqcdnzb [name: stairgen, org: usual-yellow-xou77kf, region: eu-west-2]                 
+  >  2. swtaoaeiywaecshpedxn [name: Velin-Todorov's Project, org: xjulwzabzgaokxiskdzp, region: eu-north-1]
+                                                                                                           
+                                                                                                           
+                                                                                                           
+                                                                                                           
+    ↑/k up • ↓/j down • / filter • q quit • ? more                                                         
+                                                                                                           [9A [J[2K[?2004l[?25h[?1002l[?1003l[?1006lexport type Json =
   | string
   | number
   | boolean
@@ -16,139 +25,103 @@ export type Database = {
     Tables: {
       article: {
         Row: {
-          codePreview: string | null
+          author: number | null
+          category: number | null
           created_at: string
-          dislikes: number | null
-          excerpt: string
+          dislikes: number
           id: string
+          isDraft: boolean | null
           likes: number
-          readTime: string
+          markdown: string
+          read_time: string
+          summary: string
           title: string
           updated_at: string
         }
         Insert: {
-          codePreview?: string | null
+          author?: number | null
+          category?: number | null
           created_at?: string
-          dislikes?: number | null
-          excerpt?: string
+          dislikes?: number
           id?: string
-          likes: number
-          readTime?: string
-          title?: string
-          updated_at: string
-        }
-        Update: {
-          codePreview?: string | null
-          created_at?: string
-          dislikes?: number | null
-          excerpt?: string
-          id?: string
+          isDraft?: boolean | null
           likes?: number
-          readTime?: string
+          markdown?: string
+          read_time?: string
+          summary?: string
           title?: string
           updated_at?: string
         }
-        Relationships: []
-      }
-      articles_categories: {
-        Row: {
-          article_id: string
-          category_id: number
-          id: number
-        }
-        Insert: {
-          article_id: string
-          category_id: number
-          id?: number
-        }
         Update: {
-          article_id?: string
-          category_id?: number
-          id?: number
+          author?: number | null
+          category?: number | null
+          created_at?: string
+          dislikes?: number
+          id?: string
+          isDraft?: boolean | null
+          likes?: number
+          markdown?: string
+          read_time?: string
+          summary?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "articles_categories_article_id_fkey"
-            columns: ["article_id"]
+            foreignKeyName: "article_author_id_fkey"
+            columns: ["author"]
             isOneToOne: false
-            referencedRelation: "article"
+            referencedRelation: "author"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "articles_categories_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "article_category_id_fkey"
+            columns: ["category"]
             isOneToOne: false
             referencedRelation: "category"
             referencedColumns: ["id"]
           },
         ]
       }
-      articles_tags: {
+      author: {
         Row: {
-          article_id: string
           id: number
-          tag_id: number
+          linked_in: string | null
+          name: string
+          photo_url: string | null
+          position: string
         }
         Insert: {
-          article_id: string
           id?: number
-          tag_id: number
+          linked_in?: string | null
+          name?: string
+          photo_url?: string | null
+          position?: string
         }
         Update: {
-          article_id?: string
           id?: number
-          tag_id?: number
+          linked_in?: string | null
+          name?: string
+          photo_url?: string | null
+          position?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "articles_tags_article_id_fkey"
-            columns: ["article_id"]
-            isOneToOne: false
-            referencedRelation: "article"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "articles_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tag"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       category: {
         Row: {
           color: string
           created_at: string
           id: number
-          name: string | null
-        }
-        Insert: {
-          color?: string
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Update: {
-          color?: string
-          created_at?: string
-          id?: number
-          name?: string | null
-        }
-        Relationships: []
-      }
-      tag: {
-        Row: {
-          created_at: string
-          id: number
           name: string
         }
         Insert: {
+          color?: string
           created_at?: string
           id?: number
           name?: string
         }
         Update: {
+          color?: string
           created_at?: string
           id?: number
           name?: string

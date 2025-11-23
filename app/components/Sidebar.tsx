@@ -1,15 +1,13 @@
 import { getMostPopularArtictles } from "../db/article";
 import { getCategories } from "../db/categories";
-import { getTags } from "../db/tag";
 import { Newsletter } from "./Newsletter";
 
 export async function Sidebar() {
-  const tags = await getTags();
   const categories = await getCategories();
   const mostPopularArticles = await getMostPopularArtictles();
 
   return (
-    <aside className="lg:col-span-4 space-y-8">
+    <aside className="py-12 space-y-6 max-w-md mx-auto lg:mx-0">
       {/* Categories */}
       <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
         <h3 className="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold">
@@ -55,25 +53,6 @@ export async function Sidebar() {
                     </span>
                   </div>
                 </div>
-              </a>
-            ))}
-        </div>
-      </div>
-
-      {/* Tags */}
-      <div className="bg-gray-900 border border-gray-700 rounded-lg p-6">
-        <h3 className="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold">
-          Popular Tags
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {tags &&
-            tags.map((tag) => (
-              <a
-                key={tag.id}
-                href="#"
-                className="text-xs bg-gray-800 hover:bg-cyan-400 hover:text-black px-3 py-1 rounded-full transition-colors"
-              >
-                #{tag.name}
               </a>
             ))}
         </div>

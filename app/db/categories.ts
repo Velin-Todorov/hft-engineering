@@ -1,10 +1,18 @@
 import { Database } from "@/database.types";
 import { Insert, Update } from ".";
 import { supabase } from "../lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 type Category = Database["public"]["Tables"]["category"]["Row"];
 type CategoryInsert = Insert<"category">;
 type CategoryUpdate = Update<"category">;
+
+export function useCategories() {
+   return useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => getCategories()
+   })
+}
 
 export async function getCategories(): Promise<Category[]> {
   const { data, error } = await supabase.from("category").select("*");
