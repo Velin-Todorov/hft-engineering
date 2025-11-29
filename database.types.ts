@@ -1,20 +1,3 @@
-[?25l[?2004h
-                                                                                                           
-    1. lxlspnakudgbmtqcdnzb [name: stairgen, org: usual-yellow-xou77kf, region: eu-west-2]                 
-  >  2. swtaoaeiywaecshpedxn [name: Velin-Todorov's Project, org: xjulwzabzgaokxiskdzp, region: eu-north-1]
-                                                                                                           
-                                                                                                           
-                                                                                                           
-                                                                                                           
-    ↑/k up • ↓/j down • / filter • q quit • ? more                                                         
-                                                                                                           [9A [J[2K[?2004l[?25h[?1002l[?1003l[?1006lexport type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)

@@ -33,8 +33,17 @@ export const formatDate = (timestamp: string): string => {
   const month = monthNames[date.getMonth()];
 
   const year = date.getFullYear();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
 
   return `${day}-${month}-${year} ${hours}:${minutes}`;
+};
+
+// Format date for article headers (short format without time)
+export const formatArticleDate = (date: string): string => {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };

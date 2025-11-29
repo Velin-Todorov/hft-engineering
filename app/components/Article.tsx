@@ -2,24 +2,18 @@
 
 import { Article } from "../types";
 import MarkdownRenderer from "./Markdown";
+import { formatArticleDate } from "../common/utils";
 
 interface ArticlePageProps {
   article: Article;
 }
 
 export default function ArticlePage({ article }: ArticlePageProps) {
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
 
   return (
     <div className="min-h-screen bg-black text-gray-100">
       {/* Article Header */}
-      <header className="bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700">
+      <header className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700">
         <div className="max-w-4xl mx-auto px-5 py-12 lg:py-16">
           {/* Meta Information */}
           <div className="flex items-center gap-3 mb-6 flex-wrap">
@@ -45,7 +39,7 @@ export default function ArticlePage({ article }: ArticlePageProps) {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {formatDate(article.createdAt)}
+              {formatArticleDate(article.createdAt)}
             </span>
             {article.readTime && (
               <>
@@ -85,7 +79,7 @@ export default function ArticlePage({ article }: ArticlePageProps) {
           {/* Author Info */}
           {article.author && (
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-linear-to-br from-cyan-400 to-green-400 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-green-400 rounded-full flex items-center justify-center">
                 <span className="text-lg font-bold text-black">
                   {article.author.name &&
                     article.author.name

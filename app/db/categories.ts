@@ -19,10 +19,10 @@ export async function getCategories(): Promise<Category[]> {
 
   if (error) {
     console.error("Failed to fetch categories", error.message);
-    return [];
+    throw new Error(`Failed to fetch categories: ${error.message}`);
   }
 
-  return data;
+  return data || [];
 }
 
 export async function createCategory(data: CategoryInsert) {

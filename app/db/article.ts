@@ -8,21 +8,35 @@ type RawArticle = Database["public"]["Tables"]["article"]["Row"];
 type RawArticleInsert = Insert<"article">;
 type RawArticleUpdate = Update<"article">;
 
-export function useArticles(limit: number = 10) {
+// Type for article with relationships from Supabase
+type ArticleWithRelations = RawArticle & {
+  category: Database["public"]["Tables"]["category"]["Row"] | null;
+  author: Database["public"]["Tables"]["author"]["Row"] | null;
+};
+
+export function useArticles() {
   return useQuery({
     queryKey: ["articles"],
-    queryFn: async () => getArticles(limit),
+    queryFn: async () => getArticles(),
+  });
+}
+
+export function useAllArticles() {
+  return useQuery({
+    queryKey: ["allArticles"],
+    queryFn: async () => getAllArticles(),
   });
 }
 
 export function useMostPopularArticles() {
   return useQuery({
     queryKey: ["mostPopularArticles"],
-    queryFn: async () => getMostPopularArtictles(),
+    queryFn: async () => getMostPopularArticles(),
   });
 }
 
-export async function getArticles(limit: number = 10): Promise<Article[]> {
+// getArticles fetches only published articles (isDraft = false) for the home page
+export async function getArticles(): Promise<Article[]> {
   const { data: articles, error } = await supabase
     .from("article")
     .select(
@@ -32,16 +46,49 @@ export async function getArticles(limit: number = 10): Promise<Article[]> {
       author (*)
     `
     )
-    .limit(limit)
+    .eq("isDraft", false)
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Failed to fetch articles:", error.message);
+    throw new Error(`Failed to fetch articles: ${error.message}`);
+  }
+
+  if (!articles) {
     return [];
   }
 
-  const transformedArticles = articles?.map((article) =>
-    transformArticle(article)
+  const transformedArticles = articles.map((article) =>
+    transformArticle(article as ArticleWithRelations)
+  );
+
+  return transformedArticles;
+}
+
+// getAllArticles fetches all articles including drafts for admin dashboard
+export async function getAllArticles(): Promise<Article[]> {
+  const { data: articles, error } = await supabase
+    .from("article")
+    .select(
+      `
+      *,
+      category (*),
+      author (*)
+    `
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch all articles:", error.message);
+    throw new Error(`Failed to fetch all articles: ${error.message}`);
+  }
+
+  if (!articles) {
+    return [];
+  }
+
+  const transformedArticles = articles.map((article) =>
+    transformArticle(article as ArticleWithRelations)
   );
 
   return transformedArticles;
@@ -61,7 +108,7 @@ export async function updateArticle(articleId: string, data: RawArticleUpdate) {
 
 export async function getArticleById(
   articleId: string
-): Promise<Article | undefined> {
+): Promise<Article> {
   const { data, error } = await supabase
     .from("article")
     .select(
@@ -79,18 +126,22 @@ export async function getArticleById(
       `Failed to fetch article with id ${articleId}. Error: ${error.message}`
     );
   }
-  const transformedArticle = transformArticle(data);
+  
+  if (!data) {
+    throw new Error(`Article with id ${articleId} not found`);
+  }
+  
+  const transformedArticle = transformArticle(data as ArticleWithRelations);
 
   return transformedArticle;
 }
 
-// getMostPopularArtictles fetches the most popular articles based on how many likes they got. We return the top 5 articles.
-export async function getMostPopularArtictles(): Promise<
-  RawArticle[] | undefined
-> {
+// getMostPopularArticles fetches the most popular articles based on how many likes they got. We return the top 5 articles.
+export async function getMostPopularArticles(): Promise<RawArticle[]> {
   const { data, error } = await supabase
     .from("article")
     .select("*")
+    .eq("isDraft", false)
     .order("likes", { ascending: false })
     .limit(5);
 
@@ -99,25 +150,39 @@ export async function getMostPopularArtictles(): Promise<
       `Failed to fetch most popular articles. Error:`,
       error.message
     );
-    return;
+    throw new Error(`Failed to fetch most popular articles: ${error.message}`);
   }
-  return data;
+  
+  return data || [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function transformArticle(article: any): Article {
-  const transformedArticle = {
-    ...article,
-    author: {
-      id: article.author && article.author.id,
-      photoUrl: article.author && article.author.photo_url,
-      linkedIn: article.author && article.author.linked_in,
-      name: article.author && article.author.name,
-      position: article.author && article.author.position,
-    },
-
-    createdAt: article.created_at,
+function transformArticle(article: ArticleWithRelations): Article {
+  const transformedArticle: Article = {
+    id: article.id,
+    title: article.title,
+    markdown: article.markdown,
     readTime: article.read_time,
+    likes: article.likes,
+    dislikes: article.dislikes,
+    category: article.category
+      ? {
+          id: article.category.id,
+          name: article.category.name,
+          color: article.category.color,
+        }
+      : null,
+    author: article.author
+      ? {
+          id: article.author.id,
+          photoUrl: article.author.photo_url,
+          linkedIn: article.author.linked_in,
+          name: article.author.name,
+          position: article.author.position,
+        }
+      : null,
+    isDraft: article.isDraft ?? false,
+    summary: article.summary,
+    createdAt: article.created_at,
     updatedAt: article.updated_at,
   };
   return transformedArticle;

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCategory } from "../contexts/CategoryContext";
 import { useMostPopularArticles } from "../db/article";
 import { useCategories } from "../db/categories";
@@ -71,7 +72,7 @@ export function Sidebar() {
         <div className="space-y-4">
           {mostPopularArticles &&
             mostPopularArticles.map((post, index) => (
-              <a key={index} href={`/articles/${post.id}`} className="block group">
+              <Link key={index} href={`/article/${post.id}`} className="block group">
                 <div className="flex gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-300 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-tight mb-1">
@@ -82,7 +83,7 @@ export function Sidebar() {
                     </span>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))}
         </div>
       </div>

@@ -4,8 +4,25 @@ import LandingPage from "./components/LandingPage";
 import { Sidebar } from "./components/Sidebar";
 import Pagination from "./components/Pagination";
 import { PaginationProvider } from "./contexts/PaginationContext";
-import { Newsletter } from "./components/Newsletter";
+import Newsletter from "./components/Newsletter";
 import { CategoryProvider } from "./contexts/CategoryContext";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "HFT Engineering | High-Frequency Trading Systems & Low Latency Engineering",
+  description: "Deep dives into High-Frequency Trading systems, lock-free programming, and microsecond-level optimizations. Code examples in Go, Python and Java.",
+  keywords: ["HFT", "high frequency trading", "low latency", "systems programming", "Go", "Python", "Java"],
+  openGraph: {
+    title: "HFT Engineering",
+    description: "Deep dives into High-Frequency Trading systems, lock-free programming, and microsecond-level optimizations.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HFT Engineering",
+    description: "Deep dives into High-Frequency Trading systems, lock-free programming, and microsecond-level optimizations.",
+  },
+};
 
 export default function Home() {
   return (

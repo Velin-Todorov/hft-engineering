@@ -5,11 +5,11 @@ import { Article } from "../types";
 export default function ArticleCard({ article }: { article: Article }) {
   return (
     <article className="group cursor-pointer">
-      <Link href={`article/${article.id}`}>
+      <Link href={`/article/${article.id}`}>
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
           {/* Image/Thumbnail */}
-          <div className="shrink-0 w-full sm:w-48 h-48 sm:h-32 bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center relative overflow-hidden group-hover:border-cyan-400 transition-all duration-300">
-            <div className="absolute inset-0 bg-linear-to-br from-cyan-400/10 to-green-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="shrink-0 w-full sm:w-48 h-48 sm:h-32 bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 flex items-center justify-center relative overflow-hidden group-hover:border-cyan-400 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 to-green-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="text-5xl opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-300">
               ⚡
             </div>

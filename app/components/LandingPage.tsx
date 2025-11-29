@@ -6,24 +6,41 @@ import { usePagination } from "../contexts/PaginationContext";
 import { useCategory } from "../contexts/CategoryContext";
 
 export default function LandingPage() {
-  const { limit, setLimit, currentPage, setTotalArticles } = usePagination();
+  const { limit, setLimit, currentPage, setCurrentPage, setTotalArticles } = usePagination();
   const { toggleCategory, selectedCategories, clearCategories } = useCategory();
 
-  const { data: articles, error, isLoading } = useArticles(limit);
+  const { data: articles, error, isLoading } = useArticles();
 
- let filteredArticles = articles || [];
-  
-  if (selectedCategories.length > 0) {
-    const selectedCategoryIds = selectedCategories.map((cat) => cat.id);
-    filteredArticles = filteredArticles.filter((article) =>
-      article.category && selectedCategoryIds.includes(article.category.id)
-    );
-  }
+  // Track category IDs for stable dependency
+  const categoryIds = useMemo(
+    () => selectedCategories.map((cat) => cat.id).sort().join(","),
+    [selectedCategories]
+  );
 
+  // Filter articles by selected categories
+  const filteredArticles = useMemo(() => {
+    if (!articles) return [];
+
+    if (selectedCategories.length > 0) {
+      const selectedCategoryIds = selectedCategories.map((cat) => cat.id);
+      return articles.filter(
+        (article) =>
+          article.category && selectedCategoryIds.includes(article.category.id)
+      );
+    }
+
+    return articles;
+  }, [articles, selectedCategories]);
+
+  // Update total articles count when filtered articles change
   useEffect(() => {
     setTotalArticles(filteredArticles.length);
   }, [filteredArticles.length, setTotalArticles]);
 
+  // Reset to page 1 when categories change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryIds, setCurrentPage]);
 
   if (isLoading) {
     return (

@@ -1,9 +1,12 @@
+"use client";
+
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "highlight.js/styles/github-dark.css";
 
 import Markdown from "react-markdown";
+import CopyButton from "./CopyButton";
 
 interface MarkdownRendererProps {
   markdown: string;
@@ -70,13 +73,10 @@ export default function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
           />
         ),
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        pre({ node, children, ...props }: any) {
+        pre({ node, children, ...props }: { node?: unknown; children?: React.ReactNode; [key: string]: unknown }) {
           return <>{children}</>;
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        code(props: any) {
-          const { node, className, children, ...rest } = props;
+        code({ node, className, children, ...rest }: { node?: unknown; className?: string; children?: React.ReactNode; [key: string]: unknown }) {
           const match = /language-(\w+)/.exec(className || "");
 
           if (match) {
@@ -87,16 +87,7 @@ export default function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
                   <span className="text-xs text-gray-400 uppercase font-mono">
                     {match[1]}
                   </span>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        String(children).replace(/\n$/, "")
-                      );
-                    }}
-                    className="text-xs text-gray-400 hover:text-cyan-400 transition-colors"
-                  >
-                    Copy
-                  </button>
+                  <CopyButton text={String(children).replace(/\n$/, "")} />
                 </div>
                 <SyntaxHighlighter
                   style={vscDarkPlus}
