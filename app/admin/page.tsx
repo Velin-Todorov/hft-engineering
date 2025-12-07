@@ -8,9 +8,6 @@ import { useAllArticles } from "../db/article";
 export default function AdminDashboard() {
   const { data: articles = [], isLoading, error } = useAllArticles();
 
-  const publishedCount = articles.filter((a) => !a.isDraft).length;
-  const draftCount = articles.filter((a) => a.isDraft).length;
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -29,24 +26,6 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-100 mb-2">Articles Dashboard</h2>
-        <div className="flex gap-4 text-sm">
-          <div className="bg-gray-900 border border-gray-700 rounded px-4 py-2">
-            <span className="text-gray-400">Total: </span>
-            <span className="text-cyan-400 font-bold">{articles.length}</span>
-          </div>
-          <div className="bg-gray-900 border border-gray-700 rounded px-4 py-2">
-            <span className="text-gray-400">Published: </span>
-            <span className="text-green-400 font-bold">{publishedCount}</span>
-          </div>
-          <div className="bg-gray-900 border border-gray-700 rounded px-4 py-2">
-            <span className="text-gray-400">Drafts: </span>
-            <span className="text-yellow-400 font-bold">{draftCount}</span>
-          </div>
-        </div>
-      </div>
-
       <div className="mb-4">
         <Link
           href="/admin/create"

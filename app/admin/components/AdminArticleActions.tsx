@@ -1,10 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/app/lib/supabase";
+import { useDeleteArticle } from "@/app/db/article";
 
 interface AdminArticleActionsProps {
   articleId: string;
@@ -13,36 +10,18 @@ interface AdminArticleActionsProps {
 export default function AdminArticleActions({
   articleId,
 }: AdminArticleActionsProps) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const { mutate: deleteArticle, isPending } = useDeleteArticle(articleId);
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this article? This action cannot be undone.")) {
+  const handleDelete = () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this article? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
-    setIsDeleting(true);
-    try {
-      const { error } = await supabase
-        .from("article")
-        .delete()
-        .eq("id", articleId);
-
-      if (error) {
-        alert(`Error deleting article: ${error.message}`);
-        setIsDeleting(false);
-        return;
-      }
-
-      // Invalidate React Query cache
-      queryClient.invalidateQueries({ queryKey: ["articles"] });
-      
-      router.refresh();
-    } catch {
-      alert("An unexpected error occurred");
-      setIsDeleting(false);
-    }
+    deleteArticle();
   };
 
   return (
@@ -64,12 +43,11 @@ export default function AdminArticleActions({
       <span className="text-gray-600">•</span>
       <button
         onClick={handleDelete}
-        disabled={isDeleting}
+        disabled={isPending}
         className="text-sm text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {isDeleting ? "Deleting..." : "Delete"}
+        {isPending ? "Deleting..." : "Delete"}
       </button>
     </div>
   );
 }
-

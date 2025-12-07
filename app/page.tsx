@@ -4,7 +4,6 @@ import LandingPage from "./components/LandingPage";
 import { Sidebar } from "./components/Sidebar";
 import Pagination from "./components/Pagination";
 import { PaginationProvider } from "./contexts/PaginationContext";
-import Newsletter from "./components/Newsletter";
 import { CategoryProvider } from "./contexts/CategoryContext";
 import type { Metadata } from "next";
 
@@ -37,7 +36,6 @@ export default function Home() {
               </div>
               <div>
                 <Sidebar />
-                <Newsletter />
               </div>
             </div>
             <Pagination />

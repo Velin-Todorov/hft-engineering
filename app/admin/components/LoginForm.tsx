@@ -15,10 +15,11 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
       if (signInError) {
         setError(signInError.message);
@@ -29,15 +30,15 @@ export default function LoginForm() {
       if (data.session) {
         window.location.href = "/admin";
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-lg p-8">
-      <h1 className="text-3xl font-bold text-cyan-400 mb-2 font-mono">
+    <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 sm:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-cyan-400 mb-2 font-mono">
         Admin Login
       </h1>
       <p className="text-gray-400 mb-6 text-sm">
@@ -45,7 +46,10 @@ export default function LoginForm() {
       </p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm">
+        <div
+          role="alert"
+          className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm"
+        >
           {error}
         </div>
       )}
@@ -64,7 +68,9 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
+            autoComplete="email"
+            className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-3 
+                       text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
             placeholder="admin@example.com"
           />
         </div>
@@ -82,7 +88,9 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
+            autoComplete="current-password"
+            className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-3 
+                       text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
             placeholder="••••••••"
           />
         </div>
@@ -90,7 +98,9 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-cyan-400 hover:bg-cyan-500 text-black font-bold py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500 
+                     text-black font-bold py-3 rounded transition-colors 
+                     disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
@@ -98,4 +108,3 @@ export default function LoginForm() {
     </div>
   );
 }
-

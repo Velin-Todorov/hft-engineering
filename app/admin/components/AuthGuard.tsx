@@ -1,42 +1,35 @@
 "use client";
 
 import { useAuth } from "@/app/lib/auth";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const hasRedirected = useRef(false);
+
+  const isLoginPage = pathname === "/admin/login";
 
   useEffect(() => {
-    // Only redirect if we're on an admin route (not login, not home)
-    const isAdminRoute = pathname?.startsWith("/admin");
-    const isLoginPage = pathname === "/admin/login";
-    
-    if (!loading && !session && !hasRedirected.current && isAdminRoute && !isLoginPage) {
-      hasRedirected.current = true;
-      router.push("/admin/login");
+    if (!loading && !session && !isLoginPage) {
+      router.replace("/admin/login");
     }
-    // Reset redirect flag if we're on login page or not on admin route
-    if (isLoginPage || !isAdminRoute) {
-      hasRedirected.current = false;
-    }
-  }, [session, loading, router, pathname]);
+  }, [session, loading, router, isLoginPage]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-black text-gray-100 flex items-center justify-center gap-3">
+        <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
         <p className="text-gray-400">Loading...</p>
       </div>
     );
   }
 
-  if (!session) {
+  if (!session && !isLoginPage) {
+    // Show nothing while redirecting
     return null;
   }
 
   return <>{children}</>;
 }
-

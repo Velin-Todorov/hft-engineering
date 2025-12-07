@@ -1,137 +1,133 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/app/lib/supabase";
 import { Database } from "@/database.types";
-import { getArticleById } from "@/app/db/article";
+import { getArticleById, useUpdateArticle } from "@/app/db/article";
 
 type Category = Database["public"]["Tables"]["category"]["Row"];
 type Author = Database["public"]["Tables"]["author"]["Row"];
 
-export default function EditArticle() {
+interface FormData {
+  title: string;
+  markdown: string;
+  summary: string;
+  read_time: string;
+  category: string;
+  author: string;
+  isDraft: boolean;
+  likes: number;
+  dislikes: number;
+}
+
+// Fetch functions extracted for reusability and testing
+const fetchCategories = async (): Promise<Category[]> => {
+  const { data, error } = await supabase.from("category").select("*");
+  if (error) throw error;
+  return data ?? [];
+};
+
+const fetchAuthors = async (): Promise<Author[]> => {
+  const { data, error } = await supabase.from("author").select("*");
+  if (error) throw error;
+  return data ?? [];
+};
+
+// Helper to transform article data to form data
+const articleToFormData = (
+  article: Awaited<ReturnType<typeof getArticleById>>
+): FormData => ({
+  title: article.title,
+  markdown: article.markdown,
+  summary: article.summary,
+  read_time: article.readTime,
+  category: article.category?.id.toString() || "",
+  author: article.author?.id?.toString() || "",
+  isDraft: article.isDraft,
+  likes: article.likes,
+  dislikes: article.dislikes,
+});
+
+// Separated form component that receives initial data as props
+interface ArticleFormProps {
+  initialData: FormData;
+  categories: Category[];
+  authors: Author[];
+  articleId: string;
+}
+
+function ArticleForm({
+  initialData,
+  categories,
+  authors,
+  articleId,
+}: ArticleFormProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const params = useParams();
-  const articleId = params.id as string;
+  const [formData, setFormData] = useState<FormData>(initialData);
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [authors, setAuthors] = useState<Author[]>([]);
+  const updateMutation = useUpdateArticle();
 
-  const [formData, setFormData] = useState({
-    title: "",
-    markdown: "",
-    summary: "",
-    read_time: "",
-    category: "",
-    author: "",
-    isDraft: true,
-    likes: 0,
-    dislikes: 0,
-  });
+  const handleInputChange = useCallback(
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) => {
+      const { id, value } = e.target;
+      setFormData((prev) => ({ ...prev, [id]: value }));
+    },
+    []
+  );
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Load article
-        const article = await getArticleById(articleId);
-        setFormData({
-          title: article.title,
-          markdown: article.markdown,
-          summary: article.summary,
-          read_time: article.readTime,
-          category: article.category?.id.toString() || "",
-          author: article.author?.id?.toString() || "",
-          isDraft: article.isDraft,
-          likes: article.likes,
-          dislikes: article.dislikes,
-        });
+  const handleCheckboxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, isDraft: e.target.checked }));
+    },
+    []
+  );
 
-        // Fetch categories
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from("category")
-          .select("*");
-
-        if (!categoriesError && categoriesData) {
-          setCategories(categoriesData);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      updateMutation.mutate(
+        {
+          articleId,
+          data: {
+            title: formData.title,
+            markdown: formData.markdown,
+            summary: formData.summary,
+            read_time: formData.read_time,
+            category: formData.category ? Number(formData.category) : null,
+            author: formData.author ? Number(formData.author) : null,
+            isDraft: formData.isDraft,
+            likes: formData.likes,
+            dislikes: formData.dislikes,
+          },
+        },
+        {
+          onSuccess: () => {
+            router.push("/admin");
+          },
         }
+      );
+    },
+    [formData, articleId, updateMutation, router]
+  );
 
-        // Fetch authors
-        const { data: authorsData, error: authorsError } = await supabase
-          .from("author")
-          .select("*");
+  const handleCancel = useCallback(() => {
+    router.back();
+  }, [router]);
 
-        if (!authorsError && authorsData) {
-          setAuthors(authorsData);
-        }
-
-        setLoading(false);
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error.message || "Error loading article");
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [articleId]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSaving(true);
-
-    try {
-      const updateData = {
-        title: formData.title,
-        markdown: formData.markdown,
-        summary: formData.summary,
-        read_time: formData.read_time,
-        category: formData.category ? Number(formData.category) : null,
-        author: formData.author ? Number(formData.author) : null,
-        isDraft: formData.isDraft,
-        likes: formData.likes,
-        dislikes: formData.dislikes,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error: updateError } = await supabase
-        .from("article")
-        .update(updateData)
-        .eq("id", articleId);
-
-      if (updateError) {
-        setError(`Error updating article: ${updateError.message}`);
-        setSaving(false);
-        return;
-      }
-
-      // Invalidate React Query cache
-      queryClient.invalidateQueries({ queryKey: ["articles"] });
-      
-      router.push("/admin");
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error.message || "An unexpected error occurred");
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-gray-400">Loading article...</p>
-      </div>
-    );
-  }
+  const error = updateMutation.error
+    ? updateMutation.error instanceof Error
+      ? updateMutation.error.message
+      : "An unexpected error occurred"
+    : null;
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-gray-100 mb-6">Edit Article</h2>
-
+    <>
       {error && (
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm">
           {error}
@@ -151,9 +147,7 @@ export default function EditArticle() {
               id="title"
               type="text"
               value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              onChange={handleInputChange}
               required
               className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
             />
@@ -170,9 +164,7 @@ export default function EditArticle() {
               id="read_time"
               type="text"
               value={formData.read_time}
-              onChange={(e) =>
-                setFormData({ ...formData, read_time: e.target.value })
-              }
+              onChange={handleInputChange}
               className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
             />
           </div>
@@ -187,9 +179,7 @@ export default function EditArticle() {
             <select
               id="category"
               value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
+              onChange={handleInputChange}
               className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
             >
               <option value="">Select a category</option>
@@ -211,9 +201,7 @@ export default function EditArticle() {
             <select
               id="author"
               value={formData.author}
-              onChange={(e) =>
-                setFormData({ ...formData, author: e.target.value })
-              }
+              onChange={handleInputChange}
               className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
             >
               <option value="">Select an author</option>
@@ -236,9 +224,7 @@ export default function EditArticle() {
           <textarea
             id="summary"
             value={formData.summary}
-            onChange={(e) =>
-              setFormData({ ...formData, summary: e.target.value })
-            }
+            onChange={handleInputChange}
             rows={3}
             className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 focus:outline-none focus:border-cyan-400 transition-colors"
           />
@@ -254,9 +240,7 @@ export default function EditArticle() {
           <textarea
             id="markdown"
             value={formData.markdown}
-            onChange={(e) =>
-              setFormData({ ...formData, markdown: e.target.value })
-            }
+            onChange={handleInputChange}
             required
             rows={20}
             className="w-full bg-gray-800 border border-gray-700 rounded px-4 py-2 text-gray-100 font-mono text-sm focus:outline-none focus:border-cyan-400 transition-colors"
@@ -268,9 +252,7 @@ export default function EditArticle() {
             <input
               type="checkbox"
               checked={formData.isDraft}
-              onChange={(e) =>
-                setFormData({ ...formData, isDraft: e.target.checked })
-              }
+              onChange={handleCheckboxChange}
               className="w-4 h-4 bg-gray-800 border-gray-700 rounded text-cyan-400 focus:ring-cyan-400"
             />
             <span className="text-sm text-gray-300">Save as draft</span>
@@ -280,21 +262,85 @@ export default function EditArticle() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={saving}
+            disabled={updateMutation.isPending}
             className="bg-cyan-400 hover:bg-cyan-500 text-black font-bold px-6 py-2 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </button>
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={handleCancel}
             className="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-100 font-bold px-6 py-2 rounded transition-colors"
           >
             Cancel
           </button>
         </div>
       </form>
-    </div>
+    </>
   );
 }
 
+// Main component handles data fetching only
+export default function EditArticle() {
+  const params = useParams();
+  const articleId = params.id as string;
+
+  // Parallel data fetching with React Query
+  const {
+    data: article,
+    isLoading: articleLoading,
+    error: articleError,
+  } = useQuery({
+    queryKey: ["article", articleId],
+    queryFn: () => getArticleById(articleId),
+    enabled: !!articleId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: authors = [], isLoading: authorsLoading } = useQuery({
+    queryKey: ["authors"],
+    queryFn: fetchAuthors,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const isLoading = articleLoading || categoriesLoading || authorsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-gray-400">Loading article...</p>
+      </div>
+    );
+  }
+
+  if (articleError || !article) {
+    const errorMessage =
+      articleError instanceof Error
+        ? articleError.message
+        : "Error loading article";
+    return (
+      <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-sm">
+        {errorMessage}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2 className="text-3xl font-bold text-gray-100 mb-6">Edit Article</h2>
+      <ArticleForm
+        key={articleId}
+        initialData={articleToFormData(article)}
+        categories={categories}
+        authors={authors}
+        articleId={articleId}
+      />
+    </div>
+  );
+}

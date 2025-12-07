@@ -17,7 +17,6 @@ export default function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
     <Markdown
       remarkPlugins={[remarkGfm]}
       components={{
-        // Headings
         h1: ({ node, ...props }) => (
           <h1
             className="text-4xl font-bold text-gray-100 mb-6 mt-8 first:mt-0"

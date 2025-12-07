@@ -2,7 +2,7 @@ import { Database } from "@/database.types";
 import { Insert, Update } from ".";
 import { supabase } from "../lib/supabase";
 import { Article } from "../types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 type RawArticle = Database["public"]["Tables"]["article"]["Row"];
 type RawArticleInsert = Insert<"article">;
@@ -32,6 +32,15 @@ export function useMostPopularArticles() {
   return useQuery({
     queryKey: ["mostPopularArticles"],
     queryFn: async () => getMostPopularArticles(),
+  });
+}
+
+export function useArticle(articleId: string) {
+  return useQuery({
+    queryKey: ["article", articleId],
+    queryFn: () => getArticleById(articleId),
+    enabled: !!articleId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -65,6 +74,8 @@ export async function getArticles(): Promise<Article[]> {
   return transformedArticles;
 }
 
+
+
 // getAllArticles fetches all articles including drafts for admin dashboard
 export async function getAllArticles(): Promise<Article[]> {
   const { data: articles, error } = await supabase
@@ -79,7 +90,6 @@ export async function getAllArticles(): Promise<Article[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Failed to fetch all articles:", error.message);
     throw new Error(`Failed to fetch all articles: ${error.message}`);
   }
 
@@ -103,7 +113,59 @@ export async function deleteArticle(articleId: string) {
 }
 
 export async function updateArticle(articleId: string, data: RawArticleUpdate) {
-  return await supabase.from("article").update(data).eq("id", articleId);
+  const { error } = await supabase
+    .from("article")
+    .update(data)
+    .eq("id", articleId);
+
+  if (error) {
+    throw new Error(`Failed to update article: ${error.message}`);
+  }
+}
+
+// Hook to update an article
+export function useUpdateArticle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ articleId, data }: { articleId: string; data: RawArticleUpdate }) =>
+      updateArticle(articleId, data),
+    onSuccess: (_, { articleId }) => {
+      // Invalidate relevant queries to refetch updated data
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["allArticles"] });
+      queryClient.invalidateQueries({ queryKey: ["mostPopularArticles"] });
+      queryClient.invalidateQueries({ queryKey: ["article", articleId] });
+    },
+  });
+}
+
+// Hook to create an article
+export function useCreateArticle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: RawArticleInsert) => createArticle(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["allArticles"] });
+    },
+  });
+}
+
+// Hook to delete an article
+export function useDeleteArticle(articleId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => deleteArticle(articleId),
+    onSuccess: (_, articleId) => {
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["allArticles"] });
+      queryClient.invalidateQueries({ queryKey: ["mostPopularArticles"] });
+      queryClient.invalidateQueries({ queryKey: ["article", articleId] });
+    },
+  });
 }
 
 export async function getArticleById(
