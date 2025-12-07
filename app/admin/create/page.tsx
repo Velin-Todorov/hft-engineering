@@ -48,8 +48,6 @@ export default function CreateArticle() {
         category: formData.category ? Number(formData.category) : null,
         author: formData.author ? Number(formData.author) : null,
         isDraft: formData.isDraft,
-        likes: 0,
-        dislikes: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/app/lib/supabase";
 import { Database } from "@/database.types";
 import { getArticleById, useUpdateArticle } from "@/app/db/article";
@@ -18,8 +18,6 @@ interface FormData {
   category: string;
   author: string;
   isDraft: boolean;
-  likes: number;
-  dislikes: number;
 }
 
 // Fetch functions extracted for reusability and testing
@@ -46,8 +44,6 @@ const articleToFormData = (
   category: article.category?.id.toString() || "",
   author: article.author?.id?.toString() || "",
   isDraft: article.isDraft,
-  likes: article.likes,
-  dislikes: article.dislikes,
 });
 
 // Separated form component that receives initial data as props
@@ -102,8 +98,6 @@ function ArticleForm({
             category: formData.category ? Number(formData.category) : null,
             author: formData.author ? Number(formData.author) : null,
             isDraft: formData.isDraft,
-            likes: formData.likes,
-            dislikes: formData.dislikes,
           },
         },
         {

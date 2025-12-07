@@ -3,8 +3,6 @@ export interface Article {
   title: string;
   markdown: string;
   readTime: string;
-  likes: number;
-  dislikes: number;
   category: Category | null;
   author: Author | null;
   isDraft: boolean;

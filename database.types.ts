@@ -11,10 +11,8 @@ export type Database = {
           author: number | null
           category: number | null
           created_at: string
-          dislikes: number
           id: string
           isDraft: boolean | null
-          likes: number
           markdown: string
           read_time: string
           summary: string
@@ -25,10 +23,8 @@ export type Database = {
           author?: number | null
           category?: number | null
           created_at?: string
-          dislikes?: number
           id?: string
           isDraft?: boolean | null
-          likes?: number
           markdown?: string
           read_time?: string
           summary?: string
@@ -39,10 +35,8 @@ export type Database = {
           author?: number | null
           category?: number | null
           created_at?: string
-          dislikes?: number
           id?: string
           isDraft?: boolean | null
-          likes?: number
           markdown?: string
           read_time?: string
           summary?: string

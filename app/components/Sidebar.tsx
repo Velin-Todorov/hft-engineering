@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useCategory } from "../contexts/CategoryContext";
-import { useMostPopularArticles } from "../db/article";
+import { useMostRecentArticles } from "../db/article";
 import { useCategories } from "../db/categories";
 
 export function Sidebar() {
   const { selectedCategories, toggleCategory, isCategorySelected } =
     useCategory();
   const { data: categories } = useCategories();
-  const { data: mostPopularArticles } = useMostPopularArticles();
+  const { data: mostRecentArticles } = useMostRecentArticles();
 
   return (
     <aside className="py-8 sm:py-12 space-y-6 max-w-md mx-auto lg:mx-0">
@@ -75,7 +75,7 @@ export function Sidebar() {
           Popular Posts
         </h3>
         <div className="space-y-3">
-          {mostPopularArticles?.map((post) => (
+          {mostRecentArticles?.map((post) => (
             <Link
               key={post.id}
               href={`/article/${post.id}`}
@@ -84,10 +84,9 @@ export function Sidebar() {
               <p className="text-sm text-gray-300 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-tight mb-1">
                 {post.title}
               </p>
-              <span className="text-xs text-gray-500">{post.likes} likes</span>
             </Link>
           ))}
-          {!mostPopularArticles?.length && (
+          {!mostRecentArticles?.length && (
             <p className="text-sm text-gray-500 py-2">No popular posts yet</p>
           )}
         </div>

@@ -28,10 +28,10 @@ export function useAllArticles() {
   });
 }
 
-export function useMostPopularArticles() {
+export function useMostRecentArticles() {
   return useQuery({
-    queryKey: ["mostPopularArticles"],
-    queryFn: async () => getMostPopularArticles(),
+    queryKey: ["mostRecentArticles"],
+    queryFn: async () => getMostRecentArticles(),
   });
 }
 
@@ -198,13 +198,13 @@ export async function getArticleById(
   return transformedArticle;
 }
 
-// getMostPopularArticles fetches the most popular articles based on how many likes they got. We return the top 5 articles.
-export async function getMostPopularArticles(): Promise<RawArticle[]> {
+// getMostPopularArticles fetches the most recent articles based on the creation date. We return the top 5 articles.
+export async function getMostRecentArticles(): Promise<RawArticle[]> {
   const { data, error } = await supabase
     .from("article")
     .select("*")
     .eq("isDraft", false)
-    .order("likes", { ascending: false })
+    .order("created_at", {ascending: false})
     .limit(5);
 
   if (error) {
@@ -224,8 +224,6 @@ function transformArticle(article: ArticleWithRelations): Article {
     title: article.title,
     markdown: article.markdown,
     readTime: article.read_time,
-    likes: article.likes,
-    dislikes: article.dislikes,
     category: article.category
       ? {
           id: article.category.id,
