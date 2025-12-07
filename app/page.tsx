@@ -9,8 +9,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "HFT Engineering | High-Frequency Trading Systems & Low Latency Engineering",
-  description: "Deep dives into High-Frequency Trading systems, lock-free programming, and microsecond-level optimizations. Code examples in Go, Python and Java.",
-  keywords: ["HFT", "high frequency trading", "low latency", "systems programming", "Go", "Python", "Java"],
+  description: "Deep dives into High-Frequency Trading systems, lock-free programming, and microsecond-level optimizations.",
+  keywords: ["HFT", "high frequency trading", "low latency", "systems programming", "Go"],
   openGraph: {
     title: "HFT Engineering",
     description: "Deep dives into High-Frequency Trading systems, lock-free programming, and microsecond-level optimizations.",

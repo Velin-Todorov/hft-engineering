@@ -13,7 +13,7 @@ export default function Hero() {
         </h1>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto font-mono">
           Deep dives into High-Frequency Trading systems, lock-free programming,
-          and microsecond-level optimizations. Code examples in Go, Python and Java.
+          and microsecond-level optimizations.
         </p>
       </div>
     </section>
