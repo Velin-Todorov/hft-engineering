@@ -3,7 +3,7 @@
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import "highlight.js/styles/github-dark.css";
+// import "highlight.js/styles/github-dark.css";
 
 import Markdown from "react-markdown";
 import CopyButton from "./CopyButton";
@@ -72,21 +72,27 @@ export default function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
           />
         ),
 
-        pre({ node, children, ...props }: { node?: unknown; children?: React.ReactNode; [key: string]: unknown }) {
+        pre({
+          node,
+          children,
+        }: {
+          node?: unknown;
+          children?: React.ReactNode;
+        }) {
           return <>{children}</>;
         },
-        code({ node, className, children, ...rest }: { node?: unknown; className?: string; children?: React.ReactNode; [key: string]: unknown }) {
+        code({ node, className, children, ...rest }) {
           const match = /language-(\w+)/.exec(className || "");
+          const codeString = String(children).replace(/\n$/, "");
 
           if (match) {
-            // This is a code block
             return (
               <div className="my-6 rounded-lg overflow-hidden border border-gray-700">
                 <div className="bg-gray-900 px-4 py-2 flex items-center justify-between border-b border-gray-700">
                   <span className="text-xs text-gray-400 uppercase font-mono">
                     {match[1]}
                   </span>
-                  <CopyButton text={String(children).replace(/\n$/, "")} />
+                  <CopyButton text={codeString} />
                 </div>
                 <SyntaxHighlighter
                   style={vscDarkPlus}
@@ -98,15 +104,14 @@ export default function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
                     borderRadius: 0,
                     background: "transparent",
                   }}
-                  {...rest}
                 >
-                  {String(children).replace(/\n$/, "")}
+                  {codeString}
                 </SyntaxHighlighter>
               </div>
             );
           }
 
-          // This is inline code
+          // Inline code
           return (
             <code
               className="bg-gray-800 text-cyan-400 px-1.5 py-0.5 rounded text-sm font-mono"
@@ -140,6 +145,8 @@ export default function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
         ),
         td: ({ node, ...props }) => <td className="py-3 px-4" {...props} />,
       }}
-    >{markdown}</Markdown>
+    >
+      {markdown}
+    </Markdown>
   );
 }
