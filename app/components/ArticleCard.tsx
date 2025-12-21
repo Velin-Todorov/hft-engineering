@@ -33,6 +33,7 @@ export default function ArticleCard({
     <article className="group">
       <Link
         href={`/article/${article.id}`}
+        prefetch={true}
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 
                    focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg"
         aria-label={`Read article: ${article.title}`}

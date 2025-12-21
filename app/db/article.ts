@@ -3,6 +3,7 @@ import { Insert, Update } from ".";
 import { supabase } from "../lib/supabase";
 import { Article } from "../types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { unstable_cache } from "next/cache";
 
 type RawArticle = Database["public"]["Tables"]["article"]["Row"];
 type RawArticleInsert = Insert<"article">;
@@ -168,34 +169,10 @@ export function useDeleteArticle(articleId: string) {
   });
 }
 
-export async function getArticleById(
-  articleId: string
-): Promise<Article> {
-  const { data, error } = await supabase
-    .from("article")
-    .select(
-      `
-      *,
-      category (*),
-      author(*)
-    `
-    )
-    .eq("id", articleId)
-    .single();
-
-  if (error) {
-    throw new Error(
-      `Failed to fetch article with id ${articleId}. Error: ${error.message}`
-    );
-  }
-  
-  if (!data) {
-    throw new Error(`Article with id ${articleId} not found`);
-  }
-  
-  const transformedArticle = transformArticle(data as ArticleWithRelations);
-
-  return transformedArticle;
+export async function getArticleById(articleId: string): Promise<Article> {
+  const article = await getCachedArticle(articleId);
+  if (!article) throw new Error("Article not found");
+  return article;
 }
 
 // getMostPopularArticles fetches the most recent articles based on the creation date. We return the top 5 articles.
@@ -247,3 +224,20 @@ function transformArticle(article: ArticleWithRelations): Article {
   };
   return transformedArticle;
 }
+
+const getCachedArticle = unstable_cache(
+  async (articleId: string) => {
+    const { data, error } = await supabase
+      .from("article")
+      .select(`*, category (*), author(*)`)
+      .eq("id", articleId)
+      .single();
+
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+
+    return transformArticle(data as ArticleWithRelations);
+  },
+  ["article-by-id"],
+  { revalidate: 60, tags: ["articles"] }
+);

@@ -1,46 +1,18 @@
-"use client";
-
+import { formatDate } from "../common/utils";
 import { Article } from "../types";
+import { BackButton } from "./BackButton";
+import { Icon } from "./Icon";
 import MarkdownRenderer from "./Markdown";
-import { useRouter } from "next/navigation";
 
 interface ArticlePageProps {
   article: Article;
 }
 
-const formatDate = (date: string): string => {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
 const CONTAINER_CLASSES = "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8";
 const GRADIENT_BG = "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900";
 
-interface IconProps {
-  className?: string;
-  children: React.ReactNode;
-}
-
-const Icon = ({ className = "w-4 h-4", children }: IconProps) => (
-  <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-  >
-    {children}
-  </svg>
-);
-
 export default function ArticlePage({ article }: ArticlePageProps) {
-  const router = useRouter();
-
   const formattedDate = formatDate(article.createdAt);
-
   const authorInitials =
     article.author?.name
       ?.split(" ")
@@ -49,14 +21,6 @@ export default function ArticlePage({ article }: ArticlePageProps) {
       .join("")
       .slice(0, 2) ?? "?";
 
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-black text-gray-100">
       {/* Back Button */}
@@ -64,25 +28,8 @@ export default function ArticlePage({ article }: ArticlePageProps) {
         className={`${GRADIENT_BG} border-b border-gray-700 sticky top-0 z-10 backdrop-blur-sm bg-opacity-95`}
       >
         <div className={`${CONTAINER_CLASSES} py-3 sm:py-4`}>
-          <button
-            onClick={handleBack}
-            aria-label="Go back to previous page"
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-cyan-400 
-                       active:text-cyan-500 transition-colors group
-                       min-h-[44px] min-w-[44px] -ml-2 pl-2 pr-4
-                       touch-manipulation"
-          >
-            <Icon className="w-4 h-4 group-hover:-translate-x-1 transition-transform">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </Icon>
+          <BackButton />
             <span className="hidden xs:inline">Back to Articles</span>
-            <span className="xs:hidden">Back</span>
-          </button>
         </div>
       </nav>
 
